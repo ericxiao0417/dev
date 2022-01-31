@@ -1,0 +1,148 @@
+二分查找的前提是有序数组，即 sorted 。二分查找的时间复杂度是 O(logN), 其中 N 代表数组的元素个数。
+
+二分查找的经典模板：
+    public int typicalBinarySearch(int[] array, int target) {
+        if (array == null || array.length == 0) {
+            return -1;
+        }
+        int left = 0, right = array.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (array[mid] == target) {
+                return mid;
+            } else if (array[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return -1;
+    }
+
+二分查找的衍生模板：
+    public int additionalBinarySearch(int[] array, int target) {
+        if (array == null || array.length == 0) {
+            return -1;
+        }
+        int left = 0, right = array.length - 1;
+        while (left + 1 < right) {
+            int mid = left + (right - left) / 2;
+            if (array[mid] == target) {
+                return mid;
+            } else if (array[mid] < target) {
+                left = mid;
+            } else {
+                rigth = mid;
+            }
+        }
+        //待处理的 left 和 right;
+        return -1;
+    }
+
+此模板用于大部分二分查找情况，比如第一个出现，最后一个出现等等，且时间复杂度依旧为 O(logN), 其中 N 为数组的元素个数, 且跳出 while 循环
+以后，都要再次处理 left 和 right。
+
+此衍生模板运行完以后，存在三种情况：
+    1. left, target, right;
+    2. left, right, target;
+    3. target, left, right;
+
+二分查找的典型题目：
+
+    1. 有序矩阵(matrix)搜索(一)
+        此矩阵有以下特点：
+            the matrix contains integer only, which each row is sorted in ascending order. The first element
+            next row is larger than the last element of the previous row.
+
+        此矩阵与二分查找的关系：
+            n = matrix.length, m = matrix[0].length;
+            left = 0, right = n * m - 1;
+            mid = left + (right - left) / 2;
+            row = mid / m, col = mid % m;
+            套用经典二分查找模板；
+
+        完成代码如下：
+            public int[] search(int[][] matrix, int target) {
+                if (matrix == null || matrix.length == 0 || matrix[0].length == 0) {
+                    reutrn new int[]{-1, -1};
+                }
+                int n = matrix.length, m = matrix[0].length;
+                int left = 0, right = n * m - 1;
+                while (left <= right) {
+                    int mid = left + (right - left) / 2;
+                    int row = mid / m, col = mid % m;
+                    if (matrix[row][col] == target) {
+                        return new int[]{row, col};
+                    } else if (matrix[row][col] < target) {
+                        left = mid + 1;
+                    } else {
+                        right = mid - 1;
+                    }
+                }
+                return new int[]{-1, -1};
+            }
+        
+    2. 第一次出现目标元素的索引 find the index of the first occurence of target T in the array or return -1
+        if there is no such index.
+        套用衍生二分查找模板;
+        完整代码如下:
+            public int firstOccurence(int[] array, int target) {
+                if (array == null || array.length == 0)  return -1;
+                int left = 0, right = array.length - 1;
+                while(left + 1 < right) {
+                    int mid = left + (right - left) / 2;
+                    if (array[mid] == target) {
+                        right = mid;
+                    } else if (array[mid] < target) {
+                        left = mid;
+                    } else {
+                        right = mid;
+                    }
+                } 
+                if (array[left] == target) return left;
+                if (array[right] == target) return right;
+                return -1;
+            }
+
+    3. K closest elements in sorted array. Find the K closest elements to T in array A. If there is a tier, the 
+    smaller element is preferred.
+
+        此题目的思路是采用中心开花的思想，即先找到最近的那个元素，然后同时向左边和右边遍历，直到找到 K 个元素。
+
+        完整代码如下: 
+            public int[] KClosest(int[] array, int target, int K) {
+                if (array == null || array.length == 0 || K == 0) return new int[0];
+                int closestElement = findClosest(array, target);
+                int[] ret = new int[K];
+                ret[0] = array[closestElement];
+                int left = closestElement - 1, right = closestElement + 1;
+                for (int i = 1; i < K; i++) {
+                    if (right >= array.length || left >= 0 && Math.abs(target - array[left]) < Math.abs(target - array[right])) {
+                        ret[i] = array[left];
+                        left--;
+                    } else {
+                        ret[i] = array[right];
+                        right++;
+                    }
+                }
+                return ret;
+            }
+
+            private int findClosest(int[] array, int target) {
+                int left = 0, right = array.length - 1;
+                while (left + 1 < right) {
+                    int mid = left + (right - left) / 2;
+                    if (array[mid] == target) {
+                        return mid;
+                    } else if (array[mid] < target) {
+                        left = mid;
+                    } else {
+                        right = mid;
+                    }
+                }
+                if (Math.abs(target - array[left]) < Math.abs(target - array[right])) {
+                    return left;
+                }
+                return right;
+            }
+
